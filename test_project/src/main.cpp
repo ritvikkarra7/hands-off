@@ -72,10 +72,11 @@ void loop()
   Serial.printf("Pitch (distance 1): %f\n", dist1); 
   Serial.printf("Volume (distance 2): %f\n", dist2); 
 
-  delay(1500); 
+  delay(200); 
 
+  sampleSource->setWaveType(SINE); 
   sampleSource->setFrequency(max(dist1 * 2.5, 100.00));
-  sampleSource->setMagnitude(min(dist2 * 0.005, 0.3)); 
+  sampleSource->setMagnitude(0.05); 
 
 
 }

@@ -3,6 +3,12 @@
 
 #include "SampleSource.h"
 
+enum WaveType {
+    SINE, 
+    SQUARE, 
+    TRIANGLE
+}; 
+
 class WaveFormGenerator : public SampleSource
 {
 private:
@@ -10,6 +16,7 @@ private:
     int m_frequency;
     float m_magnitude;
     float m_current_position;
+    WaveType m_wave_type = SINE; 
 
 public:
     WaveFormGenerator(int sample_rate, int frequency, float magnitude);
@@ -20,6 +27,8 @@ public:
     // Setter
     void setFrequency(int frequency);
     void setMagnitude(float magnitude);
+
+    void setWaveType(WaveType type);
 
 };
 
