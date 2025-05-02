@@ -1,7 +1,7 @@
 #include <math.h>
-#include "SinWaveGenerator.h"
+#include "WaveFormGenerator.h"
 
-SinWaveGenerator::SinWaveGenerator(int sample_rate, int frequency, float magnitude)
+WaveFormGenerator::WaveFormGenerator(int sample_rate, int frequency, float magnitude)
 {
     m_sample_rate = sample_rate;
     m_frequency = frequency;
@@ -9,7 +9,7 @@ SinWaveGenerator::SinWaveGenerator(int sample_rate, int frequency, float magnitu
     m_current_position = 0;
 }
 
-void SinWaveGenerator::getFrames(Frame_t *frames, int number_frames)
+void WaveFormGenerator::getFrames(Frame_t *frames, int number_frames)
 {
     float full_wave_samples = m_sample_rate / m_frequency;
     float step_per_sample = M_TWOPI / full_wave_samples;
@@ -26,12 +26,12 @@ void SinWaveGenerator::getFrames(Frame_t *frames, int number_frames)
     }
 }
 
-void SinWaveGenerator::setFrequency(int frequency)
+void WaveFormGenerator::setFrequency(int frequency)
 {
     m_frequency = frequency;
 }
 
-void SinWaveGenerator::setMagnitude(float magnitude)
+void WaveFormGenerator::setMagnitude(float magnitude)
 {
     m_magnitude = magnitude;
 }
