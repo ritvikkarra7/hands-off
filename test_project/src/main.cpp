@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <SPIFFS.h>
-#include "SinWaveGenerator.h"
+#include "WaveFormGenerator.h"
 #include "I2SOutput.h"
 
 // i2s pins
@@ -11,7 +11,7 @@ i2s_pin_config_t i2sPins = {
     .data_in_num = -1};
 
 I2SOutput *output;
-SinWaveGenerator *sampleSource;
+WaveFormGenerator *sampleSource;
 
 #define trig1 GPIO_NUM_32
 #define trig2 GPIO_NUM_33
@@ -34,7 +34,7 @@ void setup()
 
   Serial.println("Created sample source"); 
 
-  sampleSource = new SinWaveGenerator(40000, 2000, 0.01);
+  sampleSource = new WaveFormGenerator(40000, 2000, 0.01);
 
   // sampleSource = new WAVFileReader("/sample.wav");
 
