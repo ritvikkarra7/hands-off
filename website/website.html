@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Digital Theremin Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    label {
+      font-weight: bold;
+    }
+    select {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Theremin Waveform Controller</h1>
+  <label for="waveform">Select Waveform:</label>
+  <select id="waveform">
+    <option value="sine">Sine</option>
+    <option value="square">Square</option>
+    <option value="triangle">Triangle</option>
+    <option value="sawtooth">Sawtooth</option>
+  </select>
+
+  <script>
+    const waveformSelect = document.getElementById("waveform");
+
+    waveformSelect.addEventListener("change", (event) => {
+      const waveform = event.target.value;
+      
+      // Example: sending waveform to theremin using Web Audio API
+      if (window.oscillator) {
+        oscillator.type = waveform;
+      }
+
+      // Or send to hardware via WebSocket or Serial
+      // socket.send(JSON.stringify({ type: "waveform", value: waveform }));
+
+      console.log("Waveform changed to:", waveform);
+    });
+
+    // Web Audio API (for demo/testing purposes)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+    oscillator.connect(audioCtx.destination);
+    oscillator.start();
+  </script>
+
+</body>
+</html>
