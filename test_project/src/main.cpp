@@ -47,9 +47,7 @@ void setup()
 float getDistance(int trig, int echo) {
   // distance in mm from sensor, with smoothing and frequency mapping
 
-  static float smoothedDist = 0;  // persists between calls
-  const float alpha = 0.2;        // smoothing factor
-  const int dt = 10;
+  int dt = 10;
 
   digitalWrite(trig, LOW); 
   delayMicroseconds(dt); 
@@ -61,19 +59,31 @@ float getDistance(int trig, int echo) {
 
   int rawDist = abs((347800 * ping * pow(10, -6)) / 2.0);
 
-  // Apply exponential moving average
-  if (smoothedDist == 0) smoothedDist = rawDist; // initialize on first call
-  smoothedDist = alpha * rawDist + (1 - alpha) * smoothedDist;
+  return rawDist; 
 
+}
+
+float dist2freq(float dist) {
+
+  static float smoothedDist = 0;  // persists between calls
+  const float alpha = 0.2;        // smoothing factor
+
+  // Apply exponential moving average
+  if (smoothedDist == 0) smoothedDist = dist; // initialize on first call
+  smoothedDist = alpha * dist + (1 - alpha) * smoothedDist;
+  
   return 4509.7 * exp(-0.00619 * smoothedDist);
+
 }
 
 
 void loop()
 {
   
-  float frequency = getDistance(trig1, echo1); 
+  float dist1 = getDistance(trig1, echo1); 
   float dist2 = getDistance(trig2, echo2); 
+
+  float frequency = dist2freq(dist1); 
 
   Serial.printf("Pitch (distance 1): %f\n", frequency); 
   Serial.printf("Volume (distance 2): %f\n", dist2); 
