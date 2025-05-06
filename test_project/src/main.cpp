@@ -88,7 +88,7 @@ void loop()
   Serial.printf("Pitch (distance 1): %f\n", frequency); 
   Serial.printf("Volume (distance 2): %f\n", dist2); 
 
-  delay(10); 
+  delay(20); 
 
   sampleSource->setWaveType(SINE); 
   sampleSource->setFrequency(frequency);
