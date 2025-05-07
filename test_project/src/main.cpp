@@ -2,6 +2,7 @@
 #include <SPIFFS.h>
 #include "WaveFormGenerator.h"
 #include "I2SOutput.h"
+#include "Server.h"
 
 // i2s pins
 i2s_pin_config_t i2sPins = {
@@ -31,6 +32,8 @@ void setup()
   Serial.println("Starting up");
 
   SPIFFS.begin();
+
+  setupWebServer(); 
 
   Serial.println("Created sample source"); 
 
@@ -85,8 +88,8 @@ void loop()
 
   float frequency = dist2freq(dist1); 
 
-  Serial.printf("Pitch (distance 1): %f\n", frequency); 
-  Serial.printf("Volume (distance 2): %f\n", dist2); 
+  // Serial.printf("Pitch (distance 1): %f\n", frequency); 
+  // Serial.printf("Volume (distance 2): %f\n", dist2); 
 
   delay(20); 
 
