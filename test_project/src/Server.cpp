@@ -8,13 +8,16 @@ AsyncWebServer server(80);
 
 void setupWebServer() {
   // Connect to Wi-Fi
-  const char* ap_ssid = "theremin_server";
-  const char* ap_password = "theremin_user_123";  // optional, at least 8 characters
+  const char* ssid = "karraandfriends";
+  const char* password = "agree5013dinner";
 
-  WiFi.softAP(ap_ssid, ap_password);
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("Access Point started. IP address: ");
-  Serial.println(IP);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi connected. IP address: ");
+  Serial.println(WiFi.localIP());
 
   // Initialize SPIFFS
   if (!SPIFFS.begin(true)) {
@@ -22,15 +25,18 @@ void setupWebServer() {
     return;
   }
 
+  server.serveStatic("/functions.js", SPIFFS, "/functions.js");
+  server.serveStatic("/style.css", SPIFFS, "/style.css");
+
   // Serve HTML page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/index.html", "text/html");
   });
 
   // Example handler
-  server.on("/toggle", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println("Toggle received!");
-    request->send(200, "text/plain", "Toggled");
+  server.on("/setWaveform", HTTP_GET, [](AsyncWebServerRequest *request){
+    Serial.println("Waveform changed");
+    request->send(200, "text/plain", "Waveform changed");
   });
 
   server.begin();

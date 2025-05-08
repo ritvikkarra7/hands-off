@@ -1,26 +1,19 @@
-function setupThereminController() {
+window.addEventListener("DOMContentLoaded", () => {
   const waveformSelect = document.getElementById("waveform");
 
-  waveformSelect.addEventListener("change", (event) => {
-    const waveform = event.target.value;
-
-    if (window.oscillator) {
-      oscillator.type = waveform;
-    }
-
-    console.log("Waveform changed to:", waveform);
+  waveformSelect.addEventListener("change", () => {
+    const selected = waveformSelect.value;
+    sendWaveformRequest(selected);
   });
+});
 
-  // Web Audio API setup
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  const audioCtx = new AudioContextClass();
-  const oscillator = audioCtx.createOscillator();
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
-  oscillator.connect(audioCtx.destination);
-  oscillator.start();
-
-  window.oscillator = oscillator;
+function sendWaveformRequest(waveform) {
+  fetch(`/setWaveform?type=${encodeURIComponent(waveform)}`)
+    .then(response => response.text())
+    .then(data => {
+      console.log("Waveform set:", data);
+    })
+    .catch(err => {
+      console.error("Failed to send waveform:", err);
+    });
 }
-
-window.addEventListener("DOMContentLoaded", setupThereminController);
