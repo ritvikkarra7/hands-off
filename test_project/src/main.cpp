@@ -93,9 +93,8 @@ void loop()
 
   delay(20); 
 
-  sampleSource->setWaveType(SINE); 
+  // sampleSource->setWaveType(SINE); 
   sampleSource->setFrequency(frequency);
   sampleSource->setMagnitude(0.05); 
-
 
 }

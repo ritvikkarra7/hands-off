@@ -3,8 +3,34 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include "Server.h"
+#include "WaveFormGenerator.h"
 
+// Reference to the global WaveFormGenerator instance
+extern WaveFormGenerator *sampleSource;
 AsyncWebServer server(80);
+
+void handleSetWaveform(AsyncWebServerRequest *request) {
+  if (request->hasParam("type")) {
+    String waveform = request->getParam("type")->value();
+    waveform.toLowerCase(); // Convert to lowercase for case-insensitive comparison
+
+    if (waveform == "sine") {
+      sampleSource->setWaveType(SINE);
+    } else if (waveform == "square") {
+      sampleSource->setWaveType(SQUARE);
+    } else if (waveform == "triangle") {
+      sampleSource->setWaveType(TRIANGLE);
+    } else {
+      request->send(400, "text/plain", "Invalid waveform type");
+      return;
+    }
+
+    Serial.println("Waveform changed to: " + waveform);
+    request->send(200, "text/plain", "Waveform updated to " + waveform);
+  } else {
+    request->send(400, "text/plain", "Missing 'type' parameter");
+  }
+}
 
 void setupWebServer() {
   // Connect to Wi-Fi
@@ -34,10 +60,7 @@ void setupWebServer() {
   });
 
   // Example handler
-  server.on("/setWaveform", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println("Waveform changed");
-    request->send(200, "text/plain", "Waveform changed");
-  });
+  server.on("/setWaveform", HTTP_GET, handleSetWaveform); 
 
   server.begin();
 }
