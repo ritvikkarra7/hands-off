@@ -14,6 +14,11 @@
     select {
       margin-left: 10px;
     }
+    #frequencyDisplay {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -27,7 +32,12 @@
     <option value="sawtooth">Sawtooth</option>
   </select>
 
-  <script src="/functions.js"> </script>
+  <div id="frequencyDisplay">Current Frequency: -- Hz</div>
+
+  <script src="/functions.js"></script>
+  <script>
+    initializeWebSocket();
+  </script>
 
 </body>
 </html>

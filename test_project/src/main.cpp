@@ -69,6 +69,9 @@ void frequencyTask(void *params) {
     sampleSource->setFrequency(frequency); // Update the waveform generator
     sampleSource->setMagnitude(0.05);      // Set a fixed magnitude
 
+    // Broadcast the frequency to WebSocket clients
+    broadcastFrequency(frequency);
+
     vTaskDelay(20 / portTICK_PERIOD_MS); // Update frequency every 20ms
   }
 }
@@ -115,7 +118,7 @@ void setup() {
   xTaskCreatePinnedToCore(
     frequencyTask,
     "FrequencyTask",
-    1024,
+    2048,
     NULL,
     2,
     &frequencyTaskHandle,

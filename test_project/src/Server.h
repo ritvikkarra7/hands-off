@@ -3,5 +3,6 @@
 
 void setupWebServer();
 void startWebServices();
+void broadcastFrequency(float frequency);
 
 #endif
