@@ -121,6 +121,8 @@ void setup() {
     &frequencyTaskHandle,
     1
   );
+
+  vTaskDelete(NULL);
 }
 
 void loop() {
