@@ -34,16 +34,11 @@ void handleSetWaveform(AsyncWebServerRequest *request) {
 
 void setupWebServer() {
   // Connect to Wi-Fi
-  const char* ssid = "karraandfriends";
-  const char* password = "agree5013dinner";
 
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi connected. IP address: ");
-  Serial.println(WiFi.localIP());
+  WiFi.softAP("theremin_server", "theremin_user");  // SSID, password
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
 
   // Initialize SPIFFS
   if (!SPIFFS.begin(true)) {
