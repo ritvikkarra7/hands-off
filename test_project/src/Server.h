@@ -2,5 +2,6 @@
 #define SERVER_H
 
 void setupWebServer();
+void startWebServices();
 
 #endif

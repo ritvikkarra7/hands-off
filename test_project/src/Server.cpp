@@ -58,4 +58,12 @@ void setupWebServer() {
   server.on("/setWaveform", HTTP_GET, handleSetWaveform); 
 
   server.begin();
+  Serial.println("HTTP server started");
+}
+
+// use this function for task creation/pinning tasks to core
+void startWebServices() {
+
+  setupWebServer(); 
+
 }
