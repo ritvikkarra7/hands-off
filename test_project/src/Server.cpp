@@ -32,6 +32,16 @@ void handleSetWaveform(AsyncWebServerRequest *request) {
   }
 }
 
+void handleSerial(AsyncWebServerRequest *request) {
+  if (request->hasParam("message")) {
+    String message = request->getParam("message")->value();
+    Serial.println(message);
+    request->send(200, "text/plain", "Message sent to serial: " + message);
+  } else {
+    request->send(400, "text/plain", "Missing 'message' parameter");
+  }
+}
+
 void setupWebServer() {
   // Connect to Wi-Fi
 

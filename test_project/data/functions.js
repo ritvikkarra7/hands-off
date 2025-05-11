@@ -17,3 +17,5 @@ function sendWaveformRequest(waveform) {
       console.error("Failed to send waveform:", err);
     });
 }
+
+// testing that phoenix editor works 
