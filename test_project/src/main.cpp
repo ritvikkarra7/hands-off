@@ -3,6 +3,7 @@
 #include "WaveFormGenerator.h"
 #include "I2SOutput.h"
 #include "Server.h"
+#include <NewPing.h>
 
 // i2s pins
 i2s_pin_config_t i2sPins = {
