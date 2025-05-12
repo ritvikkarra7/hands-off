@@ -5,6 +5,13 @@
 #include "Server.h"
 #include <NewPing.h>
 
+// TODO: 
+// 1) Remove distance2freq and frequencyTask -- convert seconds directly to frequency 
+// 2) Use better moving average for distance 
+//    a) this could be done using NewPing::ping_median(). However, RTOS PRIORITY is VERY important for this to work. 
+//    b) else use a circular buffer to store the last N samples and average them
+// 3) Add the use of scales from website to select a scale to play in 
+
 // i2s pins
 i2s_pin_config_t i2sPins = {
     .bck_io_num = GPIO_NUM_27,
