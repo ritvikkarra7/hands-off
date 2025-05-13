@@ -3,14 +3,11 @@
 #include "WaveFormGenerator.h"
 #include "I2SOutput.h"
 #include "Server.h"
-#include <NewPing.h>
+#include "UltrasonicSensor.h"
 
 // TODO: 
-// 1) Remove distance2freq and frequencyTask -- convert seconds directly to frequency 
-// 2) Use better moving average for distance 
-//    a) this could be done using NewPing::ping_median(). However, RTOS PRIORITY is VERY important for this to work. 
-//    b) else use a circular buffer to store the last N samples and average them
-// 3) Add the use of scales from website to select a scale to play in 
+// 1) Implement volume control 
+// 2) Add the use of scales from website to select a scale to play in 
 
 // i2s pins
 i2s_pin_config_t i2sPins = {
@@ -29,28 +26,15 @@ WaveFormGenerator *sampleSource;
 
 TaskHandle_t frequencyTaskHandle = NULL;
 
+UltrasonicSensor freqSensor(trig_freq, echo_freq, 2.0, 100.0);
+
 // Function to calculate distance using ultrasonic sensor
 void frequencyTask(void *params) {
 
-  pinMode(trig_freq, OUTPUT);
-  pinMode(echo_freq, INPUT);
-
   while (true) {
-    digitalWrite(trig_freq, LOW);
-    delayMicroseconds(2);
-    digitalWrite(trig_freq, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trig_freq, LOW);
 
-    int duration = pulseIn(echo_freq, HIGH);
-
-    static float smoothedDuration = 0;
-    const float alpha = 0.2;
-
-    if (smoothedDuration == 0) smoothedDuration = duration;
-    smoothedDuration = alpha * duration + (1 - alpha) * smoothedDuration;
-
-    float frequency = 4509.7 * exp(-0.001075 * smoothedDuration);
+    float duration = freqSensor.readDuration();
+    float frequency = 4509.7 * exp(-0.001075 * duration);
 
     if (frequency < 20) 
     {
@@ -71,6 +55,8 @@ void frequencyTask(void *params) {
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting up");
+
+  freqSensor.begin();
 
   SPIFFS.begin();
 
