@@ -22,65 +22,49 @@ i2s_pin_config_t i2sPins = {
 I2SOutput *output;
 WaveFormGenerator *sampleSource;
 
-#define trig1 GPIO_NUM_32
+#define trig_freq GPIO_NUM_32
 #define trig2 GPIO_NUM_33
-#define echo1 GPIO_NUM_39
+#define echo_freq GPIO_NUM_39
 #define echo2 GPIO_NUM_34
 
-TaskHandle_t sensor1TaskHandle = NULL;
-TaskHandle_t sensor2TaskHandle = NULL;
 TaskHandle_t frequencyTaskHandle = NULL;
 
-volatile float distance1 = 0; // Distance from sensor 1
-volatile float distance2 = 0; // Distance from sensor 2
-
 // Function to calculate distance using ultrasonic sensor
-void ultrasonicTask(void *params) {
-  // Extract trigger and echo pins from the task parameters
-  int *pins = (int *)params;
-  int trigPin = pins[0];
-  int echoPin = pins[1];
-  float *distance = (float *)pins[2];
-
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-
-  while (true) {
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(2);
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin, LOW);
-
-    int duration = pulseIn(echoPin, HIGH);
-    *distance = abs((347800 * duration * pow(10, -6)) / 2.0);
-    vTaskDelay(50 / portTICK_PERIOD_MS); 
-  }
-}
-
-// Function to map distance to frequency
-float dist2freq(float dist) {
-  static float smoothedDist = 0;  // persists between calls
-  const float alpha = 0.2;        // smoothing factor
-
-  // Apply exponential moving average
-  if (smoothedDist == 0) smoothedDist = dist; // initialize on first call
-  smoothedDist = alpha * dist + (1 - alpha) * smoothedDist;
-
-  return 4509.7 * exp(-0.00619 * smoothedDist);
-}
-
-// Task to convert distance to frequency and update the waveform generator
 void frequencyTask(void *params) {
+
+  pinMode(trig_freq, OUTPUT);
+  pinMode(echo_freq, INPUT);
+
   while (true) {
-    float frequency = dist2freq(distance1); // Convert distance1 to frequency
-    sampleSource->setFrequency(frequency); // Update the waveform generator
-    sampleSource->setMagnitude(0.05);      // Set a fixed magnitude
+    digitalWrite(trig_freq, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trig_freq, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trig_freq, LOW);
 
-    // Broadcast the frequency to WebSocket clients
-    broadcastFrequency(frequency);
+    int duration = pulseIn(echo_freq, HIGH);
 
-    vTaskDelay(20 / portTICK_PERIOD_MS); // Update frequency every 20ms
+    static float smoothedDuration = 0;
+    const float alpha = 0.2;
+
+    if (smoothedDuration == 0) smoothedDuration = duration;
+    smoothedDuration = alpha * duration + (1 - alpha) * smoothedDuration;
+
+    float frequency = 4509.7 * exp(-0.001075 * smoothedDuration);
+
+    if (frequency < 20) 
+    {
+      sampleSource->setFrequency(0);
+      sampleSource->setMagnitude(0);
+      broadcastFrequency(0);
+    }
+    else {
+      sampleSource->setFrequency(frequency);
+      sampleSource->setMagnitude(0.05);
+      broadcastFrequency(frequency);
+    }
+
+    vTaskDelay(20 / portTICK_PERIOD_MS); 
   }
 }
 
@@ -98,35 +82,11 @@ void setup() {
   output = new I2SOutput();
   output->start(I2S_NUM_1, i2sPins, sampleSource);
 
-  // Create tasks for each ultrasonic sensor
-  static int sensor1Params[] = {trig1, echo1, (int)&distance1};
-  static int sensor2Params[] = {trig2, echo2, (int)&distance2};
-
-  xTaskCreatePinnedToCore(
-    ultrasonicTask,
-    "Sensor1Task",
-    1024,
-    sensor1Params,
-    2,
-    &sensor1TaskHandle,
-    1
-  );
-
-  xTaskCreatePinnedToCore(
-    ultrasonicTask,
-    "Sensor2Task",
-    1024,
-    sensor2Params,
-    2,
-    &sensor2TaskHandle,
-    1
-  );
-
   // Create a task to handle frequency updates
   xTaskCreatePinnedToCore(
     frequencyTask,
     "FrequencyTask",
-    2048,
+    4096,
     NULL,
     2,
     &frequencyTaskHandle,
