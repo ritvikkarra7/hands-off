@@ -2,6 +2,12 @@
 #include <SPIFFS.h>
 #include "WaveFormGenerator.h"
 #include "I2SOutput.h"
+#include "Server.h"
+#include "UltrasonicSensor.h"
+
+// TODO: 
+// 1) Implement volume control 
+// 2) Add the use of scales from website to select a scale to play in 
 
 // i2s pins
 i2s_pin_config_t i2sPins = {
@@ -13,76 +19,69 @@ i2s_pin_config_t i2sPins = {
 I2SOutput *output;
 WaveFormGenerator *sampleSource;
 
-#define trig1 GPIO_NUM_32
+#define trig_freq GPIO_NUM_32
 #define trig2 GPIO_NUM_33
-#define echo1 GPIO_NUM_39
-#define echo2  GPIO_NUM_34
+#define echo_freq GPIO_NUM_39
+#define echo2 GPIO_NUM_34
 
-void setup()
-{
+TaskHandle_t frequencyTaskHandle = NULL;
 
-  pinMode(echo1, INPUT); 
-  pinMode(echo2, INPUT);
-  pinMode(trig1, OUTPUT); 
-  pinMode(trig2, OUTPUT); 
+UltrasonicSensor freqSensor(trig_freq, echo_freq, 2.0, 100.0);
 
+// Function to calculate distance using ultrasonic sensor
+void frequencyTask(void *params) {
+
+  while (true) {
+
+    float duration = freqSensor.readDuration();
+    float frequency = 4509.7 * exp(-0.001075 * duration);
+
+    if (frequency < 20) 
+    {
+      sampleSource->setFrequency(0);
+      sampleSource->setMagnitude(0);
+      broadcastFrequency(0);
+    }
+    else {
+      sampleSource->setFrequency(frequency);
+      sampleSource->setMagnitude(0.05);
+      broadcastFrequency(frequency);
+    }
+
+    vTaskDelay(20 / portTICK_PERIOD_MS); 
+  }
+}
+
+void setup() {
   Serial.begin(115200);
-
   Serial.println("Starting up");
+
+  freqSensor.begin();
 
   SPIFFS.begin();
 
-  Serial.println("Created sample source"); 
+  startWebServices();
 
   sampleSource = new WaveFormGenerator(40000, 2000, 0.01);
 
-  // sampleSource = new WAVFileReader("/sample.wav");
-
-  // Serial.println("Starting I2S Output");
+  Serial.println("Starting I2S Output");
   output = new I2SOutput();
   output->start(I2S_NUM_1, i2sPins, sampleSource);
 
+  // Create a task to handle frequency updates
+  xTaskCreatePinnedToCore(
+    frequencyTask,
+    "FrequencyTask",
+    4096,
+    NULL,
+    2,
+    &frequencyTaskHandle,
+    1
+  );
+
+  vTaskDelete(NULL);
 }
 
-float getDistance(int trig, int echo) {
-  // distance in mm from sensor, with smoothing and frequency mapping
-
-  static float smoothedDist = 0;  // persists between calls
-  const float alpha = 0.2;        // smoothing factor
-  const int dt = 10;
-
-  digitalWrite(trig, LOW); 
-  delayMicroseconds(dt); 
-  digitalWrite(trig, HIGH); 
-  delayMicroseconds(dt); 
-  digitalWrite(trig, LOW); 
-
-  int ping = pulseIn(echo, HIGH); 
-
-  int rawDist = abs((347800 * ping * pow(10, -6)) / 2.0);
-
-  // Apply exponential moving average
-  if (smoothedDist == 0) smoothedDist = rawDist; // initialize on first call
-  smoothedDist = alpha * rawDist + (1 - alpha) * smoothedDist;
-
-  return 4509.7 * exp(-0.00619 * smoothedDist);
-}
-
-
-void loop()
-{
-  
-  float frequency = getDistance(trig1, echo1); 
-  float dist2 = getDistance(trig2, echo2); 
-
-  Serial.printf("Pitch (distance 1): %f\n", frequency); 
-  Serial.printf("Volume (distance 2): %f\n", dist2); 
-
-  delay(10); 
-
-  sampleSource->setWaveType(SINE); 
-  sampleSource->setFrequency(frequency);
-  sampleSource->setMagnitude(0.05); 
-
-
+void loop() {
+  // Empty loop as all tasks are handled by FreeRTOS
 }

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Digital Theremin Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    label {
+      font-weight: bold;
+    }
+    select {
+      margin-left: 10px;
+    }
+    #frequencyDisplay {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Theremin Waveform Controller</h1>
+  <label for="waveform">Select Waveform:</label>
+  <select id="waveform">
+    <option value="sine">Sine</option>
+    <option value="square">Square</option>
+    <option value="triangle">Triangle</option>
+    <option value="sawtooth">Sawtooth</option>
+  </select>
+
+  <div id="frequencyDisplay">Current Frequency: -- Hz</div>
+
+  <script src="/functions.js"></script>
+  <script>
+    initializeWebSocket();
+  </script>
+
+</body>
+</html>
