@@ -6,7 +6,7 @@
 #include "UltrasonicSensor.h"
 
 // TODO: 
-// 1) Implement volume control 
+// 1) Handle mode switching from website
 // 2) Add the use of scales from website to select a scale to play in 
 
 // i2s pins
@@ -20,13 +20,14 @@ I2SOutput *output;
 WaveFormGenerator *sampleSource;
 
 #define trig_freq GPIO_NUM_32
-#define trig2 GPIO_NUM_33
+#define trig_vol GPIO_NUM_33
 #define echo_freq GPIO_NUM_39
-#define echo2 GPIO_NUM_34
+#define echo_vol GPIO_NUM_34
 
 TaskHandle_t frequencyTaskHandle = NULL;
 
 UltrasonicSensor freqSensor(trig_freq, echo_freq, 2.0, 100.0);
+UltrasonicSensor volSensor(trig_vol, echo_vol, 2.0, 100.0);
 
 // Function to calculate distance using ultrasonic sensor
 void frequencyTask(void *params) {

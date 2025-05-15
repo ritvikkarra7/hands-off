@@ -6,7 +6,8 @@
 enum WaveType {
     SINE, 
     SQUARE, 
-    TRIANGLE
+    TRIANGLE,
+    SAWTOOTH
 }; 
 
 class WaveFormGenerator : public SampleSource

@@ -47,9 +47,36 @@ void handleSetWaveform(AsyncWebServerRequest *request) {
       Serial.println("Error: sampleSource is NULL");
       request->send(500, "text/plain", "Internal Server Error: sampleSource is NULL");
     }
+  } else if (waveform == "sawtooth") {
+    if (sampleSource) {
+      sampleSource->setWaveType(SAWTOOTH);
+      Serial.println("Waveform changed to: sawtooth");
+      request->send(200, "text/plain", "Waveform updated to sawtooth");
+    } else {
+      Serial.println("Error: sampleSource is NULL");
+      request->send(500, "text/plain", "Internal Server Error: sampleSource is NULL");
+    }
   } else {
     Serial.println("Error: Invalid waveform type");
     request->send(400, "text/plain", "Invalid waveform type");
+  }
+}
+
+void handleSetMode(AsyncWebServerRequest *request)
+{
+  if (request->hasParam("value")) {
+    String mode = request->getParam("value")->value();
+    mode.toLowerCase();
+    Serial.printf("Received mode: %s\n", mode.c_str());
+    if (mode == "digital"){
+      ; 
+    }
+    else if (mode == "analog"){
+      ; 
+    }
+    request->send(200, "text/plain", "Mode received: " + mode);
+    } else {
+    request->send(400, "text/plain", "Missing mode value");
   }
 }
 
@@ -73,7 +100,7 @@ void setupWebServer() {
   }
 
   server.serveStatic("/functions.js", SPIFFS, "/functions.js");
-  server.serveStatic("/style.css", SPIFFS, "/style.css");
+  server.serveStatic("/styles.css", SPIFFS, "/styles.css");
 
   // Serve HTML page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -82,6 +109,7 @@ void setupWebServer() {
 
   // Example handler
   server.on("/setWaveform", HTTP_GET, handleSetWaveform);
+  server.on("setMode", HTTP_GET, handleSetMode); 
 
   // Add WebSocket handler
   ws.onEvent([](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {

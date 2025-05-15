@@ -2,10 +2,19 @@ let websocket;
 
 window.addEventListener("DOMContentLoaded", () => {
   const waveformSelect = document.getElementById("waveform");
+  const modeRadios = document.querySelectorAll('input[name="mode"]');
 
   waveformSelect.addEventListener("change", () => {
     const selected = waveformSelect.value;
     sendWaveformRequest(selected);
+  });
+
+  modeRadios.forEach(radio => {
+    radio.addEventListener("change", () => {
+      if (radio.checked) {
+        sendModeRequest(radio.value);
+      }
+    });
   });
 });
 
@@ -36,5 +45,16 @@ function sendWaveformRequest(waveform) {
     })
     .catch(err => {
       console.error("Failed to send waveform:", err);
+    });
+}
+
+function sendModeRequest(mode) {
+  fetch(`/setMode?value=${encodeURIComponent(mode)}`)
+    .then(response => response.text())
+    .then(data => {
+      console.log("Mode set:", data);
+    })
+    .catch(err => {
+      console.error("Failed to send mode:", err);
     });
 }

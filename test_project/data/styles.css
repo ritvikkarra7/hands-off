@@ -1,0 +1,36 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  label {
+    font-weight: bold;
+  }
+  
+  select {
+    margin-left: 10px;
+  }
+  
+  .control-group {
+    margin-bottom: 15px;
+  }
+  
+  .label {
+    font-weight: bold;
+  }
+  
+  .radio-group {
+    display: inline-block;
+    margin-left: 10px;
+  }
+  
+  .radio-group label {
+    margin-right: 15px;
+    font-weight: normal;
+  }
+  
+  #frequencyDisplay {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+  }

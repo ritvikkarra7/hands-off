@@ -49,6 +49,17 @@ void WaveFormGenerator::getFrames(Frame_t *frames, int number_frames)
                         value = 4.0f * fabs(normalized_phase - 0.5f) - 1.0f;
                     }
                     break;
+                case SAWTOOTH:
+
+                    {
+                        float normalized_phase = phase / M_TWOPI;
+                        value = 2.0f * normalized_phase - 1.0f;
+                    }
+                    break;
+                    
+                default:
+                    value = 0.0f; // Default case, should not happen
+                    break;
             }
     
             frames[i].left = frames[i].right = 16384 * m_magnitude * value;
