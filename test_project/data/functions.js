@@ -2,11 +2,17 @@ let websocket;
 
 window.addEventListener("DOMContentLoaded", () => {
   const waveformSelect = document.getElementById("waveform");
+  const scaleSelect = document.getElementById("scale");
   const modeRadios = document.querySelectorAll('input[name="mode"]');
 
   waveformSelect.addEventListener("change", () => {
     const selected = waveformSelect.value;
     sendWaveformRequest(selected);
+  });
+
+  scaleSelect.addEventListener("change", () => {
+    const selectedScale = scaleSelect.value;
+    sendScaleRequest(selectedScale);
   });
 
   modeRadios.forEach(radio => {
@@ -56,5 +62,16 @@ function sendModeRequest(mode) {
     })
     .catch(err => {
       console.error("Failed to send mode:", err);
+    });
+}
+
+function sendScaleRequest(scale) {
+  fetch(`/setScale?type=${encodeURIComponent(scale)}`)
+    .then(response => response.text())
+    .then(data => {
+      console.log("Scale set:", data);
+    })
+    .catch(err => {
+      console.error("Failed to send scale:", err);
     });
 }
