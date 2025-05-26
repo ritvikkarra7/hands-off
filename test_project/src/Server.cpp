@@ -80,9 +80,38 @@ void handleSetMode(AsyncWebServerRequest *request)
   }
 }
 
+void handleSetScale(AsyncWebServerRequest *request)
+{
+  if (request->hasParam("value")) {
+    String scale = request->getParam("value")->value();
+    scale.toLowerCase();
+    Serial.printf("Received scale: %s\n", scale.c_str());
+
+    if (scale == "default") {
+      sampleSource->setScale(SCALE_DEFAULT);
+    } else if (scale == "chromatic") {
+      sampleSource->setScale(SCALE_CHROMATIC);
+    } else if (scale == "major") {
+      sampleSource->setScale(SCALE_MAJOR);
+    } else if (scale == "minor") {
+      sampleSource->setScale(SCALE_MINOR);
+    } else if (scale == "pentatonic") {
+      sampleSource->setScale(SCALE_PENTATONIC);
+    } else {
+      request->send(400, "text/plain", "Invalid scale value");
+      return;
+    }
+
+    request->send(200, "text/plain", "Scale set to: " + scale);
+  } else {
+    request->send(400, "text/plain", "Missing scale value");
+  }
+}
+
+
 // Broadcast frequency to WebSocket clients
 void broadcastFrequency(float frequency) {
-  Serial.printf("Broadcasting frequency: %.2f Hz\n", frequency);
+  // Serial.printf("Broadcasting frequency: %.2f Hz\n", frequency);
   ws.textAll(String(frequency)); // Send the frequency to all connected WebSocket clients
 }
 
@@ -109,7 +138,9 @@ void setupWebServer() {
 
   // Example handler
   server.on("/setWaveform", HTTP_GET, handleSetWaveform);
-  server.on("setMode", HTTP_GET, handleSetMode); 
+  server.on("/setMode", HTTP_GET, handleSetMode); 
+  server.on("/setScale", HTTP_GET, handleSetScale); 
+
 
   // Add WebSocket handler
   ws.onEvent([](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {

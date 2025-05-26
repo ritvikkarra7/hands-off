@@ -31,25 +31,21 @@ UltrasonicSensor volSensor(trig_vol, echo_vol, 2.0, 100.0);
 
 // Function to calculate distance using ultrasonic sensor
 void frequencyTask(void *params) {
-
   while (true) {
-
     float duration = freqSensor.readDuration();
-    float frequency = 4509.7 * exp(-0.001075 * duration);
+    float frequency = sampleSource->getNoteFromDuration(duration);
 
-    if (frequency < 20) 
-    {
+    if (frequency < 20 || isnan(frequency)) {
       sampleSource->setFrequency(0);
       sampleSource->setMagnitude(0);
       broadcastFrequency(0);
-    }
-    else {
+    } else {
       sampleSource->setFrequency(frequency);
       sampleSource->setMagnitude(0.05);
       broadcastFrequency(frequency);
     }
 
-    vTaskDelay(20 / portTICK_PERIOD_MS); 
+    vTaskDelay(20 / portTICK_PERIOD_MS);
   }
 }
 

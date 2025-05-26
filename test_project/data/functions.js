@@ -66,7 +66,7 @@ function sendModeRequest(mode) {
 }
 
 function sendScaleRequest(scale) {
-  fetch(`/setScale?type=${encodeURIComponent(scale)}`)
+  fetch(`/setScale?value=${encodeURIComponent(scale)}`)
     .then(response => response.text())
     .then(data => {
       console.log("Scale set:", data);

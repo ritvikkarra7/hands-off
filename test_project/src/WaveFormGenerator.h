@@ -10,6 +10,15 @@ enum WaveType {
     SAWTOOTH
 }; 
 
+enum Scale {
+    SCALE_DEFAULT, 
+    SCALE_CHROMATIC, 
+    SCALE_MAJOR, 
+    SCALE_MINOR,  
+    SCALE_PENTATONIC,
+};
+
+
 class WaveFormGenerator : public SampleSource
 {
 private:
@@ -18,6 +27,10 @@ private:
     float m_magnitude;
     float m_current_position;
     WaveType m_wave_type = SINE; 
+    Scale currentScale;
+    const float* scaleFrequencies;
+    int scaleLength;
+    int currentNoteIndex = -1;
 
 public:
     WaveFormGenerator(int sample_rate, int frequency, float magnitude);
@@ -30,6 +43,8 @@ public:
     void setMagnitude(float magnitude);
 
     void setWaveType(WaveType type);
+    void setScale(Scale scale);
+    float getNoteFromDuration(float duration);
 
 };
 
