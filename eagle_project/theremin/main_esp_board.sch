@@ -11606,6 +11606,11 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <wire x1="-157.48" y1="154.94" x2="-165.1" y2="154.94" width="0.1524" layer="91"/>
 <label x="-165.1" y="154.94" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="ESP32" gate="G$1" pin="GPIO22"/>
+<wire x1="101.6" y1="299.72" x2="109.22" y2="299.72" width="0.1524" layer="91"/>
+<label x="104.14" y="299.72" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="SDA" class="0">
 <segment>
@@ -11617,6 +11622,11 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <pinref part="DIGIPOT1" gate="A" pin="SDA"/>
 <wire x1="-116.84" y1="154.94" x2="-106.68" y2="154.94" width="0.1524" layer="91"/>
 <label x="-114.3" y="154.94" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="ESP32" gate="G$1" pin="GPIO21"/>
+<wire x1="101.6" y1="292.1" x2="109.22" y2="292.1" width="0.1524" layer="91"/>
+<label x="104.14" y="292.1" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="IN+" class="0">
