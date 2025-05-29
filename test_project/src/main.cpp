@@ -4,6 +4,7 @@
 #include "I2SOutput.h"
 #include "Server.h"
 #include "UltrasonicSensor.h"
+#include "CAT5171.h"
 
 // TODO: 
 // 1) Handle mode switching from website
@@ -25,6 +26,7 @@ WaveFormGenerator *sampleSource;
 #define echo_vol GPIO_NUM_34
 
 TaskHandle_t frequencyTaskHandle = NULL;
+CAT5171 digipot; // Digital Potentiometer for volume control
 
 UltrasonicSensor freqSensor(trig_freq, echo_freq, 2.0, 100.0);
 UltrasonicSensor volSensor(trig_vol, echo_vol, 2.0, 100.0);
@@ -54,6 +56,7 @@ void setup() {
   Serial.println("Starting up");
 
   freqSensor.begin();
+  digipot.setWiper(200); // Initialize digital potentiometer to 0
 
   SPIFFS.begin();
 
