@@ -69,10 +69,16 @@ void handleSetMode(AsyncWebServerRequest *request)
     mode.toLowerCase();
     Serial.printf("Received mode: %s\n", mode.c_str());
     if (mode == "digital"){
-      ; 
+      digitalWrite(SEL, LOW); // Set SEL low for digital mode
+      Serial.println("Digital mode selected");
     }
     else if (mode == "analog"){
-      ; 
+      digitalWrite(SEL, HIGH); // Set SEL high for analog mode
+      Serial.println("Analog mode selected");
+    } else {
+      Serial.println("Error: Invalid mode");
+      request->send(400, "text/plain", "Invalid mode value");
+      return;
     }
     request->send(200, "text/plain", "Mode received: " + mode);
     } else {

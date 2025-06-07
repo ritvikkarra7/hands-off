@@ -15,17 +15,21 @@ class CAT5171
     void setWiper(byte position);
 
     // Get the current wiper position
-    byte getWiper();
+    byte getWiper(byte deviceIndex);
 
     // Shut down the device. Wiper = B, A is open circuit
     void shutDown();
 
     // Switch to the second I2C address supported by this device (maximum of 2 of this devices can be on the same I2C bus)
+    void setWiperBoth(byte position); // New method to set wiper on both devices
+
     void switchToSecondDevice();
 
   private:
     // The currently selected device address
     byte _address;
+    const uint8_t _addresses[2] = { ADDRESS0, ADDRESS1 };
+
 };
 
 #endif

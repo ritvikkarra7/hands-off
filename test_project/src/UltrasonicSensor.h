@@ -46,6 +46,8 @@ public:
         U_hat += K * (duration - H * U_hat);            // Update estimate
         P = (1 - K * H) * P + Q;                         // Update error covariance
 
+        Serial.println("reading duration"); 
+
         return U_hat;
     }
 

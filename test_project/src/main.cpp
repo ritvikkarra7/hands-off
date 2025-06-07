@@ -5,6 +5,7 @@
 #include "Server.h"
 #include "UltrasonicSensor.h"
 #include "CAT5171.h"
+#include "utilities.h"
 
 // TODO: 
 // 1) Handle mode switching from website
@@ -24,8 +25,11 @@ WaveFormGenerator *sampleSource;
 #define trig_vol GPIO_NUM_33
 #define echo_freq GPIO_NUM_39
 #define echo_vol GPIO_NUM_34
+#define pot GPIO_NUM_35
 
 TaskHandle_t frequencyTaskHandle = NULL;
+TaskHandle_t potTaskHandle = NULL;
+TaskHandle_t volumeTaskHandle = NULL;
 CAT5171 digipot; // Digital Potentiometer for volume control
 
 UltrasonicSensor freqSensor(trig_freq, echo_freq, 2.0, 100.0);
@@ -51,17 +55,42 @@ void frequencyTask(void *params) {
   }
 }
 
+void potTask(void *params) {
+  while (true) {
+
+    int potValue = analogRead(pot);
+    byte gain = map(potValue, 0, 4095, 0, 255);
+
+    digipot.setWiperBoth(gain); 
+
+    vTaskDelay(20 / portTICK_PERIOD_MS);
+  }
+}
+
+void volumeTask(void *params) {
+  while (true) {
+    float duration = volSensor.readDuration();
+    double volume = map(duration, 0, 500, 255, 0); // Map duration to volume (0 to 1)
+    volume = constrain(volume, 0, 255); // Ensure volume is within bounds
+    digipot.setWiperBoth((byte)volume); // Set the digital potentiometer wiper
+    vTaskDelay(20 / portTICK_PERIOD_MS);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting up");
 
   freqSensor.begin();
+  volSensor.begin();
   digipot.setWiper(200); // Initialize digital potentiometer to 0
 
   SPIFFS.begin();
 
   startWebServices();
 
+  pinMode(SEL, OUTPUT); // GPIO for the multiplexer control
+  digitalWrite(SEL, LOW); // mux is low for digital mode by default
   sampleSource = new WaveFormGenerator(40000, 2000, 0.01);
 
   Serial.println("Starting I2S Output");
@@ -76,6 +105,26 @@ void setup() {
     NULL,
     2,
     &frequencyTaskHandle,
+    1
+  );
+
+  xTaskCreatePinnedToCore(
+    potTask, 
+    "PotentiometerTask",
+    4096, 
+    NULL, 
+    2, 
+    &potTaskHandle, 
+    1
+  ); 
+
+  xTaskCreatePinnedToCore(
+    volumeTask, 
+    "VolumeTask",
+    4096, 
+    NULL, 
+    2, 
+    &volumeTaskHandle, 
     1
   );
 
