@@ -132,7 +132,7 @@ void WaveFormGenerator::setScale(Scale scale) {
 float WaveFormGenerator::getNoteFromDuration(float duration) {
     if (!scaleFrequencies || scaleLength <= 0) {
         // Continuous (non-quantized) mapping
-        Serial.printf("%.2f ms duration, returning continuous frequency\n", duration);
+        // Serial.printf("%.2f ms duration, returning continuous frequency\n", duration);
         return 4509.7 * exp(-0.001075 * duration);
     }
 

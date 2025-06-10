@@ -46,7 +46,10 @@ public:
         U_hat += K * (duration - H * U_hat);            // Update estimate
         P = (1 - K * H) * P + Q;                         // Update error covariance
 
-        Serial.println("reading duration"); 
+        // Serial.println("reading duration"); 
+        // convert duration to distance in cm
+        // float distance = U_hat * 0.034 / 2; // Speed of sound is 0.034 cm/us, divided by 2 for round trip
+        // Serial.printf("Distance: %.2f cm\n", distance);
 
         return U_hat;
     }

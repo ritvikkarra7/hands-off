@@ -32,8 +32,10 @@ TaskHandle_t potTaskHandle = NULL;
 TaskHandle_t volumeTaskHandle = NULL;
 CAT5171 digipot; // Digital Potentiometer for volume control
 
-UltrasonicSensor freqSensor(trig_freq, echo_freq, 2.0, 100.0);
-UltrasonicSensor volSensor(trig_vol, echo_vol, 2.0, 100.0);
+UltrasonicSensor freqSensor(trig_freq, echo_freq, 1.0, 100.0);
+UltrasonicSensor volSensor(trig_vol, echo_vol, 1.0, 100.0);
+
+double magnitude = 0.05; 
 
 // Function to calculate distance using ultrasonic sensor
 void frequencyTask(void *params) {
@@ -47,7 +49,7 @@ void frequencyTask(void *params) {
       broadcastFrequency(0);
     } else {
       sampleSource->setFrequency(frequency);
-      sampleSource->setMagnitude(0.05);
+      sampleSource->setMagnitude(magnitude);
       broadcastFrequency(frequency);
     }
 
@@ -58,22 +60,38 @@ void frequencyTask(void *params) {
 void potTask(void *params) {
   while (true) {
 
-    int potValue = analogRead(pot);
-    byte gain = map(potValue, 0, 4095, 0, 255);
+    Serial.println("Potentiometer Task Running");
+    if (digitalRead(SEL) == HIGH){
 
-    digipot.setWiperBoth(gain); 
+      int potValue = analogRead(pot);
+      byte gain = map(potValue, 0, 4095, 0, 255);
+      Serial.println("Potentiometer Value: " + String(potValue) + ", Gain: " + String(gain));
+      digipot.setWiperBoth(gain); 
+    }
 
     vTaskDelay(20 / portTICK_PERIOD_MS);
+
   }
 }
 
 void volumeTask(void *params) {
   while (true) {
-    float duration = volSensor.readDuration();
-    double volume = map(duration, 0, 500, 255, 0); // Map duration to volume (0 to 1)
-    volume = constrain(volume, 0, 255); // Ensure volume is within bounds
-    digipot.setWiperBoth((byte)volume); // Set the digital potentiometer wiper
+
+    Serial.println("Volume Task Running");
+    if (digitalRead(SEL) == LOW) {
+
+      float duration = volSensor.readDuration();
+      magnitude = 0.3 * exp(-0.00285 * duration); 
+      Serial.println("Volume Duration: " + String(duration) + " ms, Magnitude: " + String(magnitude));
+      if (magnitude > 0.3 || magnitude < 0.0001) {
+        sampleSource->setMagnitude(0); // Cap volume at 0.3
+      } 
+      sampleSource->setMagnitude(magnitude); // Set magnitude based on volume
+
+    }
+
     vTaskDelay(20 / portTICK_PERIOD_MS);
+
   }
 }
 
@@ -83,7 +101,7 @@ void setup() {
 
   freqSensor.begin();
   volSensor.begin();
-  digipot.setWiper(200); // Initialize digital potentiometer to 0
+  digipot.setWiperBoth(200); // Initialize digital potentiometer to 0
 
   SPIFFS.begin();
 
@@ -91,41 +109,38 @@ void setup() {
 
   pinMode(SEL, OUTPUT); // GPIO for the multiplexer control
   digitalWrite(SEL, LOW); // mux is low for digital mode by default
-  sampleSource = new WaveFormGenerator(40000, 2000, 0.01);
+  sampleSource = new WaveFormGenerator(40000, 2000, 0.05);
 
   Serial.println("Starting I2S Output");
   output = new I2SOutput();
   output->start(I2S_NUM_1, i2sPins, sampleSource);
 
   // Create a task to handle frequency updates
-  xTaskCreatePinnedToCore(
+  xTaskCreate(
     frequencyTask,
     "FrequencyTask",
     4096,
     NULL,
     2,
-    &frequencyTaskHandle,
-    1
+    &frequencyTaskHandle
   );
 
-  xTaskCreatePinnedToCore(
+  xTaskCreate(
     potTask, 
     "PotentiometerTask",
     4096, 
     NULL, 
     2, 
-    &potTaskHandle, 
-    1
+    &potTaskHandle
   ); 
 
-  xTaskCreatePinnedToCore(
+  xTaskCreate(
     volumeTask, 
     "VolumeTask",
-    4096, 
+    8192, 
     NULL, 
     2, 
-    &volumeTaskHandle, 
-    1
+    &volumeTaskHandle
   );
 
   vTaskDelete(NULL);
